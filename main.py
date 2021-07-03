@@ -26,4 +26,7 @@ async def on_voice_state_update(member, before, after) :
         except AttributeError:
             pass 
 
+@bot.event
+async def on_message() :
+    
 bot.run(token)
