@@ -87,7 +87,7 @@ async def sendMessage():
     if myMessageFlag == MessageState.DELETED:
         myMessageFlag = MessageState.CREATED
         print(myMessageFlag.name)
-        myMessage = await myChannel.send("Hello world!")
+        myMessage = await myChannel.send("เรียกกี่คนดี")
         for emoji in count_emojis:
             await myMessage.add_reaction(emoji)
 
