@@ -3,8 +3,8 @@ import enum
 from discord.ext import commands
 import os
 
-# from dotenv import load_dotenv
-# load_dotenv(verbose=True)
+from dotenv import load_dotenv
+load_dotenv(verbose=True)
 
 class MessageState(enum.Enum):
     CREATED = 0
@@ -13,28 +13,29 @@ class MessageState(enum.Enum):
     SENT = 3
 
 token = os.getenv("DISCORD_TOKEN")
-bot = commands.Bot(command_prefix=['/coach', 'cn!', '!'])
-# client = discord.Client(activity=discord.Game(name="NOT BLAMING YOU"))
+bot = commands.Bot(command_prefix=['/coach', 'cn!', '!', '/'])
 channels = dict()
 myChannel = ""
 myMessage = ""
 myMessageFlag = MessageState.DELETED
-# game_emojis = ['\U0001f44d', '<:ward:805396908293750784>']
 count_emojis = ["{}\N{COMBINING ENCLOSING KEYCAP}".format(num) for num in range(1, 6)]
-# count_emojis = [u'\u00000031\u000020e3']
-up_down_emojis = ['\U0001F53C', '\U0001F53D', '\U00002611']
-role = "<@&868454738168016926>"
+up_down_emojis = ['\U0001F44A', '\U0001F53C', '\U0001F53D', '\U00002611']
 taggedMessage = dict()
 
 @bot.listen('on_ready')
 async def ready():
-    global myChannel
-    global myMessage
-    myChannel = bot.get_channel(int(os.getenv("TEST_CHANNEL_ID"))) 
-    print("Logged in as {0.user}".format(bot))
+
+    global myChannel, myMessage, generalChannel
+
+    channel_name = os.getenv("CHANNEL_NAME")
+    if(channel_name == None):
+        channel_name = "general"
+    myChannel = discord.utils.get(bot.get_all_channels(), name=channel_name)
+
     async for elem in myChannel.history(limit=50).filter(botMessageFilter):
         await elem.delete()
     await sendMessage()
+    print("Logged in as {0.user} in {1}".format(bot, channel_name))
 
 @bot.listen('on_message')
 async def inMessage(message):
@@ -49,21 +50,8 @@ async def reactionRawAdd(payload):
 async def reactionRawRemove(payload):
     await removedEmoji(payload)
 
-# @bot.event
-# async def on_voice_state_update(member, before, after) :
-#      if before.channel is None and after.channel is not None and not member.bot:
-#         voice_client = await after.channel.connect() 
-#         voice_client.play(discord.FFmpegPCMAudio("sawas-dee-krub.mp3"))
-#         while voice_client.is_playing(): 
-#             await(asyncio.sleep(0.2))
-#         try:
-#             if voice_client.channel is not None:
-#                 await voice_client.disconnect() 
-#         except AttributeError:
-#             pass 
-
 def botMessageFilter(message):
-    return message.author.bot
+    return message.author == bot.user
 
 async def sendMessage():
     global myMessage, myMessageFlag
@@ -82,23 +70,13 @@ async def removeMessage():
         await myMessage.delete()
 
 async def refreshMessage():
+    global myMessageFlag
+    found = await myChannel.history(limit = 10).find(botMessageFilter)
+    if found == None:
+        myMessageFlag = MessageState.DELETED
+        print("assumed deleted")
     await removeMessage()
     await sendMessage()
-
-# async def addedEmoji(payload):
-#     global myMessageFlag, selected_game_emoji
-#     if payload.message_id == myMessage.id and payload.user_id != bot.user.id and (payload.emoji.name in game_emojis or payload.emoji.name in count_emojis):
-#         if myMessageFlag == MessageState.CREATED:
-#             myMessageFlag = MessageState.SELECTED
-#             print(myMessageFlag.name)
-#             selected_game_emoji = payload.emoji
-#             for emoji in count_emojis:
-#                 await myMessage.add_reaction(emoji)
-#         elif myMessageFlag == MessageState.SELECTED:
-#             myMessageFlag = MessageState.SENT
-#             print(myMessageFlag.name)
-#             await tagSubscriber(selected_game_emoji, payload.emoji)
-#             await refreshMessage()
 
 async def addedEmoji(payload):
     global myMessageFlag, selected_game_emoji
@@ -120,21 +98,21 @@ async def handleMyMessage(payload):
         await tagSubscriber(payload.emoji.name)
 
 async def handleTaggedMessage(payload):
-    if payload.emoji.name == up_down_emojis[0]:
+    if payload.emoji.name == up_down_emojis[1]:
         current_count = taggedMessage[payload.message_id][0]
         if current_count >= (len(count_emojis)-1):
             return
         await tagSubscriber(count_emojis[current_count+1])
         await taggedMessage[payload.message_id][1].delete()
         taggedMessage.pop(payload.message_id)
-    elif payload.emoji.name == up_down_emojis[1]:
+    elif payload.emoji.name == up_down_emojis[2]:
         current_count = taggedMessage[payload.message_id][0]
         if current_count <= 0:
             return
         await tagSubscriber(count_emojis[current_count-1])
         await taggedMessage[payload.message_id][1].delete()
         taggedMessage.pop(payload.message_id)
-    elif payload.emoji.name == up_down_emojis[2]:
+    elif payload.emoji.name == up_down_emojis[3]:
         await taggedMessage[payload.message_id][1].delete()
         taggedMessage.pop(payload.message_id)
 
