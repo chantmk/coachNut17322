@@ -1,14 +1,10 @@
 import discord
 import enum
-from discord import channel
 from discord.ext import commands
 import os
-import asyncio
-import json
-import emoji
 
-from dotenv import load_dotenv
-load_dotenv(verbose=True)
+# from dotenv import load_dotenv
+# load_dotenv(verbose=True)
 
 class MessageState(enum.Enum):
     CREATED = 0
@@ -114,7 +110,7 @@ async def addedEmoji(payload):
 
 async def removedEmoji(payload):
     print("removed")
-    
+
 async def handleMyMessage(payload):
     global myMessageFlag
     if payload.emoji.name not in count_emojis:
@@ -122,7 +118,6 @@ async def handleMyMessage(payload):
     if myMessageFlag == MessageState.CREATED:
         myMessageFlag = MessageState.SENT
         await tagSubscriber(payload.emoji.name)
-        await refreshMessage()
 
 async def handleTaggedMessage(payload):
     if payload.emoji.name == up_down_emojis[0]:
@@ -149,5 +144,6 @@ async def tagSubscriber(count_emoji):
     for emoji in up_down_emojis:
         await message.add_reaction(emoji)
     taggedMessage[message.id] = (count_emojis.index(count_emoji), message)
+    await refreshMessage()
 
 bot.run(token)
