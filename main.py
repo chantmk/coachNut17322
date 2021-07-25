@@ -75,8 +75,10 @@ async def refreshMessage():
     if found == None:
         myMessageFlag = MessageState.DELETED
         print("assumed deleted")
-    await removeMessage()
-    await sendMessage()
+        await sendMessage()
+    else :
+        await removeMessage()
+        await sendMessage()
 
 async def addedEmoji(payload):
     global myMessageFlag, selected_game_emoji
