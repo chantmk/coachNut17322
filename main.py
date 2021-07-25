@@ -118,7 +118,6 @@ async def handleMyMessage(payload):
     if myMessageFlag == MessageState.CREATED:
         myMessageFlag = MessageState.SENT
         await tagSubscriber(payload.emoji.name)
-        await refreshMessage()
 
 async def handleTaggedMessage(payload):
     if payload.emoji.name == up_down_emojis[0]:
@@ -145,5 +144,6 @@ async def tagSubscriber(count_emoji):
     for emoji in up_down_emojis:
         await message.add_reaction(emoji)
     taggedMessage[message.id] = (count_emojis.index(count_emoji), message)
+    await refreshMessage()
 
 bot.run(token)
