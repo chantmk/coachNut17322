@@ -1,14 +1,10 @@
 import discord
 import enum
-from discord import channel
 from discord.ext import commands
 import os
-import asyncio
-import json
-import emoji
 
-from dotenv import load_dotenv
-load_dotenv(verbose=True)
+# from dotenv import load_dotenv
+# load_dotenv(verbose=True)
 
 class MessageState(enum.Enum):
     CREATED = 0
@@ -114,7 +110,7 @@ async def addedEmoji(payload):
 
 async def removedEmoji(payload):
     print("removed")
-    
+
 async def handleMyMessage(payload):
     global myMessageFlag
     if payload.emoji.name not in count_emojis:
