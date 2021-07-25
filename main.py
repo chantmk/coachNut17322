@@ -22,24 +22,53 @@ count_emojis = ["{}\N{COMBINING ENCLOSING KEYCAP}".format(num) for num in range(
 up_down_emojis = ['\U0001F44A', '\U0001F53C', '\U0001F53D', '\U00002611']
 taggedMessage = dict()
 
+@bot.listen('on_connect')
+async def connected():
+    print("connected")
+    test_channel_name = os.getenv("CHANNEL_NAME")
+    if(test_channel_name == None):
+        test_channel_name = "general"
+    test_myChannel = discord.utils.get(bot.get_all_channels(), name=test_channel_name)
+    print(test_channel_name, test_myChannel)
+
+@bot.listen('on_guild_join')
+async def join(guild):
+    global myChannel, myMessage
+    channel_name = os.getenv("CHANNEL_NAME")
+    if(channel_name == None):
+        channel_name = "general"
+    # myChannel = discord.utils.get(bot.get_all_channels(), name=channel_name)
+    general_channel = ""
+    for channel in guild.channels:
+        if channel.name == "general":
+            general_channel = channel
+        if channel.name == channel_name:
+            myChannel = channel
+            break
+    else:
+        myChannel = general_channel
+
+    print("Join {} in {}".format(myChannel, guild))
+    async for elem in myChannel.history(limit=50).filter(botMessageFilter):
+        await elem.delete()
+    await sendMessage()
+
 @bot.listen('on_ready')
 async def ready():
-
-    global myChannel, myMessage, generalChannel
-
+    print("ready")
+    global myChannel, myMessage
     channel_name = os.getenv("CHANNEL_NAME")
     if(channel_name == None):
         channel_name = "general"
     myChannel = discord.utils.get(bot.get_all_channels(), name=channel_name)
-
     async for elem in myChannel.history(limit=50).filter(botMessageFilter):
         await elem.delete()
     await sendMessage()
-    print("Logged in as {0.user} in {1}".format(bot, channel_name))
+    print("Logged in as {0.user}".format(bot))
 
 @bot.listen('on_message')
 async def inMessage(message):
-    if message.author != bot.user:
+    if not message.author.bot:
         await refreshMessage()
 
 @bot.listen('on_raw_reaction_add')
@@ -81,7 +110,7 @@ async def refreshMessage():
         await sendMessage()
 
 async def addedEmoji(payload):
-    global myMessageFlag, selected_game_emoji
+    global myMessageFlag
     if payload.user_id != bot.user.id:
         if payload.message_id == myMessage.id:
             await handleMyMessage(payload)
