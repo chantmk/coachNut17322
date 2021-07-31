@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import date, datetime
+from pathlib import Path
 
 import logging
 import os
@@ -9,6 +10,8 @@ import os
 import EventListener
 
 load_dotenv(verbose=True)
+
+Path("./logs").mkdir(exist_ok=True)
 
 filename = datetime.now().strftime("%Y%m%d%H%M%S")
 handler = logging.FileHandler(filename=f'logs\{filename}.log', encoding='utf-8', mode='w')
