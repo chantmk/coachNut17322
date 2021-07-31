@@ -1,13 +1,13 @@
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 
 import logging
 import os
 
-import EventListener
+from scripts.EventListener import EventListener
 
 load_dotenv(verbose=True)
 
@@ -20,5 +20,5 @@ handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(me
 token = os.getenv("DISCORD_TOKEN")
 bot = commands.Bot(command_prefix=['/coach', 'cn!', '!', '/'])
 
-bot.add_cog(EventListener.EventListener(bot, handler))
+bot.add_cog(EventListener(bot, handler))
 bot.run(token)

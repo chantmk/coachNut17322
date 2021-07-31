@@ -1,10 +1,12 @@
 import os
 import discord
 import logging
-import Utils
+
 from discord import channel
 from discord.ext import commands
-from DataStructure import MessageState
+
+import scripts.Utils
+from scripts.DataStructure import MessageState
 
 count_emojis = ["{}\N{COMBINING ENCLOSING KEYCAP}".format(num) for num in range(1, 6)]
 up_down_emojis = ['\U0001F44A', '\U0001F53C', '\U0001F53D', '\U00002611']
@@ -12,7 +14,7 @@ up_down_emojis = ['\U0001F44A', '\U0001F53C', '\U0001F53D', '\U00002611']
 class EventListener(commands.Cog):
     def __init__(self, bot, handler):
         self.bot = bot
-        self.logger = Utils.setupLogger(handler, "Main")
+        self.logger = scripts.Utils.setupLogger(handler, "Main")
         self.channel = ""
         self.message = ""
         self.flag = MessageState.DELETED
@@ -81,7 +83,7 @@ class EventListener(commands.Cog):
         self.logger.info("On Reaction Added; Reaction: {}, User: {}".format(reaction, user))
 
     @commands.Cog.listener('on_raw_reaction_add')
-    async def onReactionRawAdd(self, payload):
+    async def onRawReactionAdd(self, payload):
         self.logger.info("On Raw Reaction Added: {}".format(payload))
         await self.addedEmoji(payload)
 
@@ -90,7 +92,7 @@ class EventListener(commands.Cog):
         self.logger.info("On Reaction Removed; Reaction: {}, User: {}".format(reaction, user))
 
     @commands.Cog.listener('on_raw_reaction_remove')
-    async def reactionRawRemove(self, payload):
+    async def onRawReactionRemove(self, payload):
         self.logger.info("On Raw Reaction Removed: {}".format(payload))
         await self.removedEmoji(payload)
 
