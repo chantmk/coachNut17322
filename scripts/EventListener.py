@@ -8,25 +8,20 @@ from discord.ext import commands
 import scripts.Utils
 from scripts.DataStructure import MessageState
 
-count_emojis = ["{}\N{COMBINING ENCLOSING KEYCAP}".format(num) for num in range(1, 6)]
-up_down_emojis = ['\U0001F44A', '\U0001F53C', '\U0001F53D', '\U00002611']
-
 class EventListener(commands.Cog):
-    def __init__(self, bot, handler):
+    def __init__(self, bot, handler, config, emoji):
         self.bot = bot
-        self.logger = scripts.Utils.setupLogger(handler, "Main")
+        self.logger = scripts.Utils.setupLogger(handler, "Event Listener")
         self.channel = ""
         self.message = ""
         self.flag = MessageState.DELETED
         self.taggedMessage = dict()
+        self.config = config
+        self.emojis = emoji
 
     @commands.Cog.listener('on_connect')
     async def onConnected(self):
         self.logger.info("On Connect")
-        test_channel_name = os.getenv("CHANNEL_NAME")
-        if(test_channel_name == None):
-            test_channel_name = "general"
-        test_myChannel = discord.utils.get(self.bot.get_all_channels(), name=test_channel_name)
 
     @commands.Cog.listener('on_disconnect')
     async def onDisconnected(self): 
@@ -63,9 +58,7 @@ class EventListener(commands.Cog):
         if(channel_name == None):
             channel_name = "general"
         self.channel = discord.utils.get(self.bot.get_all_channels(), name=channel_name)
-        async for elem in self.channel.history(limit=50).filter(self.botMessageFilter):
-            await elem.delete()
-        await self.sendMessage()
+        await self.clearMessage()
         self.logger.info("Logged in as {0.user}".format(self.bot))
 
     @commands.Cog.listener('on_message')
@@ -99,12 +92,21 @@ class EventListener(commands.Cog):
     def botMessageFilter(self, message):
         return message.author == self.bot.user
 
+    async def clearMessage(self):
+        async for elem in self.channel.history(limit=50).filter(self.botMessageFilter):
+            if self.flag == MessageState.DELETED and elem.content == self.config["welcome_message"]:
+                self.message = elem
+                self.flag = MessageState.CREATED
+            else:
+                await elem.delete()
+        if self.flag == MessageState.DELETED:
+            await self.sendMessage()
+
     async def sendMessage(self):
         if self.flag == MessageState.DELETED:
             self.flag = MessageState.CREATED
-            print(self.flag.name)
-            self.message = await self.channel.send("เรียกกี่คนดี")
-            for emoji in count_emojis:
+            self.message = await self.channel.send(self.config["welcome_message"])
+            for emoji in self.emojis["numbers"]:
                 await self.message.add_reaction(emoji)
 
     async def removeMessage(self):
@@ -132,35 +134,35 @@ class EventListener(commands.Cog):
         self.logger("remove emoji")
 
     async def handleMyMessage(self, payload):
-        if payload.emoji.name not in count_emojis:
+        if payload.emoji.name not in self.emojis["numbers"]:
             return
         if self.flag == MessageState.CREATED:
             self.flag = MessageState.SENT
             await self.tagSubscriber(payload.emoji.name)
 
     async def handleTaggedMessage(self, payload):
-        if payload.emoji.name == up_down_emojis[1]:
+        if payload.emoji.name == self.emojis["tags"][1]:
             current_count = self.taggedMessage[payload.message_id][0]
-            if current_count >= (len(count_emojis)-1):
+            if current_count >= (len(self.emojis["numbers"])-1):
                 return
-            await self.tagSubscriber(count_emojis[current_count+1])
+            await self.tagSubscriber(self.emojis["numbers"][current_count+1])
             await self.taggedMessage[payload.message_id][1].delete()
             self.taggedMessage.pop(payload.message_id)
-        elif payload.emoji.name == up_down_emojis[2]:
+        elif payload.emoji.name == self.emojis["tags"][2]:
             current_count = self.taggedMessage[payload.message_id][0]
             if current_count <= 0:
                 return
-            await self.tagSubscriber(count_emojis[current_count-1])
+            await self.tagSubscriber(self.emojis["numbers"][current_count-1])
             await self.taggedMessage[payload.message_id][1].delete()
             self.taggedMessage.pop(payload.message_id)
-        elif payload.emoji.name == up_down_emojis[3]:
+        elif payload.emoji.name == self.emojis["tags"][3]:
             await self.taggedMessage[payload.message_id][1].delete()
             self.taggedMessage.pop(payload.message_id)
 
 
     async def tagSubscriber(self, count_emoji):
         message = await self.channel.send('@here {}'.format(count_emoji))
-        for emoji in up_down_emojis:
+        for emoji in self.emojis["tags"]:
             await message.add_reaction(emoji)
-        self.taggedMessage[message.id] = (count_emojis.index(count_emoji), message)
+        self.taggedMessage[message.id] = (self.emojis["numbers"].index(count_emoji), message)
         await self.refreshMessage()
