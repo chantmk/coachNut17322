@@ -4,7 +4,6 @@ from discord.ext import commands
 
 from scripts.Utils import setupLogger
 from scripts.Keys import *
-from scripts.Constant import TAG_MESSAGE_TIMEOUT
 from scripts.DataStructure import MessageState
 
 LOGGER_TAG = "Event Listener"
@@ -163,7 +162,7 @@ class EventListener(commands.Cog):
 
 
     async def tagSubscriber(self, count_emoji):
-        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(count_emoji), delete_after=TAG_MESSAGE_TIMEOUT)
+        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(count_emoji), delete_after=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_TAG_KEY])
         for emoji in self.config[EMOJI_KEY][TAGS_EMOJI_KEY]:
             await message.add_reaction(emoji)
         self.taggedMessage[message.id] = (self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY].index(count_emoji), message)
