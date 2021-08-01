@@ -1,15 +1,13 @@
 from discord.ext import commands
-from scripts.Utils import setupLogger, fromJsonFile
+from scripts.Utils import *
 
+from scripts.Keys import SENTENCE_KEY
 class CommandHandler(commands.Cog):
-    def __init__(self, bot, handler, config, emoji):
+    def __init__(self, bot, handler, config):
         self.bot = bot
         self.logger = setupLogger(handler, "CommandHandler")
-        self.emoji = emoji
-        self.sentence = fromJsonFile(config["sentence_data"], self.logger)
+        self.sentence = fromJsonFile(config[SENTENCE_KEY], self.logger)
     
     @commands.command(aliases=["b"])
-    async def blameSomeone(self, ctx, **args):
-        print("yeah")
-        print(ctx)
-        print(args)
+    async def curse(self, ctx, **args):
+        self.logger.info("Cursing")

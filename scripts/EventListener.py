@@ -1,23 +1,22 @@
 import os
 import discord
-import logging
-
-from discord import channel
 from discord.ext import commands
 
-import scripts.Utils
+from scripts.Utils import setupLogger
+from scripts.Keys import *
 from scripts.DataStructure import MessageState
 
+LOGGER_TAG = "Event Listener"
+
 class EventListener(commands.Cog):
-    def __init__(self, bot, handler, config, emoji):
+    def __init__(self, bot, handler, config):
         self.bot = bot
-        self.logger = scripts.Utils.setupLogger(handler, "Event Listener")
+        self.logger = setupLogger(handler, LOGGER_TAG)
         self.channel = ""
         self.message = ""
         self.flag = MessageState.DELETED
         self.taggedMessage = dict()
         self.config = config
-        self.emojis = emoji
 
     @commands.Cog.listener('on_connect')
     async def onConnected(self):
@@ -34,12 +33,12 @@ class EventListener(commands.Cog):
     @commands.Cog.listener('on_guild_join')
     async def onGuildJoin(self, guild):
         self.logger.info("On Guild Join")
-        channel_name = os.getenv("CHANNEL_NAME")
-        if(channel_name == None):
-            channel_name = "general"
+        channel_name = self.config[CONFIG_KEY][CONFIG_NAME_KEY]
+        if(channel_name == ""):
+            channel_name = self.config[CONFIG_KEY][DEFAULT_NAME_KEY]
         general_channel = ""
         for channel in guild.channels:
-            if channel.name == "general":
+            if channel.name == self.config[CONFIG_KEY][DEFAULT_NAME_KEY]:
                 general_channel = channel
             if channel.name == channel_name:
                 self.channel = channel
@@ -54,9 +53,9 @@ class EventListener(commands.Cog):
     @commands.Cog.listener('on_ready')
     async def ready(self):
         self.logger.info("On Ready")
-        channel_name = os.getenv("CHANNEL_NAME")
-        if(channel_name == None):
-            channel_name = "general"
+        channel_name = self.config[CONFIG_KEY][CONFIG_NAME_KEY]
+        if(channel_name == ""):
+            channel_name = self.config[CONFIG_KEY][DEFAULT_NAME_KEY]
         self.channel = discord.utils.get(self.bot.get_all_channels(), name=channel_name)
         await self.clearMessage()
         self.logger.info("Logged in as {0.user}".format(self.bot))
@@ -94,7 +93,7 @@ class EventListener(commands.Cog):
 
     async def clearMessage(self):
         async for elem in self.channel.history(limit=50).filter(self.botMessageFilter):
-            if self.flag == MessageState.DELETED and elem.content == self.config["welcome_message"]:
+            if self.flag == MessageState.DELETED and elem.content == self.config[SENTENCE_KEY][WELCOME_MESSAGE_KEY]:
                 self.message = elem
                 self.flag = MessageState.CREATED
             else:
@@ -105,8 +104,8 @@ class EventListener(commands.Cog):
     async def sendMessage(self):
         if self.flag == MessageState.DELETED:
             self.flag = MessageState.CREATED
-            self.message = await self.channel.send(self.config["welcome_message"])
-            for emoji in self.emojis["numbers"]:
+            self.message = await self.channel.send(self.config[SENTENCE_KEY][WELCOME_MESSAGE_KEY])
+            for emoji in self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]:
                 await self.message.add_reaction(emoji)
 
     async def removeMessage(self):
@@ -131,38 +130,38 @@ class EventListener(commands.Cog):
                 await self.handleTaggedMessage(payload)
 
     async def removedEmoji(self, payload):
-        self.logger("remove emoji")
+        self.logger.info("remove emoji")
 
     async def handleMyMessage(self, payload):
-        if payload.emoji.name not in self.emojis["numbers"]:
+        if payload.emoji.name not in self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]:
             return
         if self.flag == MessageState.CREATED:
             self.flag = MessageState.SENT
             await self.tagSubscriber(payload.emoji.name)
 
     async def handleTaggedMessage(self, payload):
-        if payload.emoji.name == self.emojis["tags"][1]:
+        if payload.emoji.name == self.config[EMOJI_KEY][TAGS_EMOJI_KEY][1]:
             current_count = self.taggedMessage[payload.message_id][0]
-            if current_count >= (len(self.emojis["numbers"])-1):
+            if current_count >= (len(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY])-1):
                 return
-            await self.tagSubscriber(self.emojis["numbers"][current_count+1])
+            await self.tagSubscriber(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY][current_count+1])
             await self.taggedMessage[payload.message_id][1].delete()
             self.taggedMessage.pop(payload.message_id)
-        elif payload.emoji.name == self.emojis["tags"][2]:
+        elif payload.emoji.name == self.config[EMOJI_KEY][TAGS_EMOJI_KEY][2]:
             current_count = self.taggedMessage[payload.message_id][0]
             if current_count <= 0:
                 return
-            await self.tagSubscriber(self.emojis["numbers"][current_count-1])
+            await self.tagSubscriber(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY][current_count-1])
             await self.taggedMessage[payload.message_id][1].delete()
             self.taggedMessage.pop(payload.message_id)
-        elif payload.emoji.name == self.emojis["tags"][3]:
+        elif payload.emoji.name == self.config[EMOJI_KEY][TAGS_EMOJI_KEY][3]:
             await self.taggedMessage[payload.message_id][1].delete()
             self.taggedMessage.pop(payload.message_id)
 
 
     async def tagSubscriber(self, count_emoji):
-        message = await self.channel.send('@here {}'.format(count_emoji))
-        for emoji in self.emojis["tags"]:
+        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(count_emoji))
+        for emoji in self.config[EMOJI_KEY][TAGS_EMOJI_KEY]:
             await message.add_reaction(emoji)
-        self.taggedMessage[message.id] = (self.emojis["numbers"].index(count_emoji), message)
+        self.taggedMessage[message.id] = (self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY].index(count_emoji), message)
         await self.refreshMessage()

@@ -1,6 +1,8 @@
 {
+    "welcome_message" : "เรียกเพื่อนกี่คนดี",
+    "tag_message" : "@here {}",
     "blame" : [
-        "ควาย{name}",
-        "โง่{name}"
+        "ควาย{}",
+        "โง่{}"
     ]
 }
