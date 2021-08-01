@@ -3,12 +3,12 @@ A discord bot that tag friends with count from reaction in sticky message develo
 
 [Invite link](https://discord.com/api/oauth2/authorize?client_id=805073270713745438&permissions=3352640&scope=bot)
 
-## Ref:
+### :scroll: Ref
 - [Unicode emojis](]https://unicode.org/emoji/charts-12.0/full-emoji-list.html#1f53c)
 - [discord.py reference](https://discordpy.readthedocs.io/en/stable/api.html)
 - [discord.py extension reference](https://discordpy.readthedocs.io/en/latest/ext/commands/api.html)
 
-### :scroll: TODO
+### :pencil: TODO
 - [x] Sticky message to hold button
 - [x] Emoji as push button to tag friends
     - [x] Add or Subtract call
