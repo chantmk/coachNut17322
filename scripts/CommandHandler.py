@@ -1,15 +1,62 @@
+from random import choice
 from discord.ext import commands
-from scripts.Utils import setupLogger, fromJsonFile
 
+from scripts.Utils import *
+from scripts.Keys import SENTENCE_KEY, NO_NAME_KEY, CURSE_KEY, ADD_RESULT_KEY, REMOVE_RESULT_KEY, SUCCESS_KEY, CONTAINED_KEY, FAILED_KEY, NOT_IN_ROOM_KEY, CURSE_FILE_NAME, CONFIG_KEY, SENTENCE_DATA_KEY
+from scripts.Constant import CURSE_MESSAGE_TIMEOUT, ADD_ALIASES, REMOVE_ALIASES
+
+LOGGER_TAG = "Command Handler"
 class CommandHandler(commands.Cog):
-    def __init__(self, bot, handler, config, emoji):
+    def __init__(self, bot, handler, config):
         self.bot = bot
-        self.logger = setupLogger(handler, "CommandHandler")
-        self.emoji = emoji
-        self.sentence = fromJsonFile(config["sentence_data"], self.logger)
+        self.logger = setupLogger(handler, LOGGER_TAG)
+        self.config = config
     
-    @commands.command(aliases=["b"])
-    async def blameSomeone(self, ctx, **args):
-        print("yeah")
-        print(ctx)
-        print(args)
+    @commands.command(aliases=["c"])
+    async def curse(self, ctx, *args):
+        await self.handleCurse(ctx, args, False)
+
+    @commands.command(aliases=["cs", "curse_with_sound"])
+    async def curseWithSound(self, ctx, *args):
+        if ctx.author.voice is None:
+            await ctx.send(self.config[SENTENCE_KEY][NOT_IN_ROOM_KEY], delete_after=CURSE_MESSAGE_TIMEOUT)
+            await ctx.message.delete()
+        else:
+            await self.handleCurse(ctx, args, True)
+        
+    async def handleCurse(self, ctx, args, tts=False):
+        if len(args) == 0:
+            await ctx.send(self.config[SENTENCE_KEY][NO_NAME_KEY])
+        elif len(args) == 1:
+            curse_sentence = choice(self.config[SENTENCE_KEY][CURSE_KEY]).format(args[0])
+            if tts:
+                await sendTTS(ctx, curse_sentence, self.config[CONFIG_KEY][CURSE_FILE_NAME])
+            else :
+                await ctx.send(curse_sentence, delete_after=CURSE_MESSAGE_TIMEOUT)
+        elif len(args) == 2:
+            await self.handleAddRemoveCurse(ctx, args[0], args[1])
+        await ctx.message.delete()
+
+    async def handleAddRemoveCurse(self, ctx, curse, command):
+        if command.lower() in ADD_ALIASES:
+            try:
+                if curse not in self.config[SENTENCE_KEY][CURSE_KEY]:
+                    self.config[SENTENCE_KEY][CURSE_KEY].append(curse)
+                    toJsonFile(self.config[CONFIG_KEY][SENTENCE_DATA_KEY], self.config[SENTENCE_KEY], self.logger)
+                    await ctx.send(self.config[SENTENCE_KEY][ADD_RESULT_KEY][SUCCESS_KEY].format(curse))
+                else:
+                    await ctx.send(self.config[SENTENCE_KEY][ADD_RESULT_KEY][CONTAINED_KEY].format(curse))
+            except Exception as e:
+                self.logger.error(str(e))
+                await ctx.send(self.config[SENTENCE_KEY][ADD_RESULT_KEY][FAILED_KEY].format(curse))
+        elif command.lower() in REMOVE_ALIASES:
+            try:
+                if curse in self.config[SENTENCE_KEY][CURSE_KEY]:
+                    self.config[SENTENCE_KEY][CURSE_KEY].remove(curse)
+                    toJsonFile(self.config[CONFIG_KEY][SENTENCE_DATA_KEY], self.config[SENTENCE_KEY], self.logger)
+                    await ctx.send(self.config[SENTENCE_KEY][REMOVE_RESULT_KEY][SUCCESS_KEY].format(curse))
+                else:
+                    await ctx.send(self.config[SENTENCE_KEY][REMOVE_RESULT_KEY][CONTAINED_KEY].format(curse))
+            except Exception as e:
+                self.logger.error(str(e))
+                await ctx.send(self.config[SENTENCE_KEY][REMOVE_RESULT_KEY][FAILED_KEY].format(curse))

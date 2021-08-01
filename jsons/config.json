@@ -3,5 +3,5 @@
     "config_channel_name": "",
     "emoji_data" : "jsons/emoji.json",
     "sentence_data" : "jsons/sentence.json",
-    "welcome_message" : "เรียกเพื่อนกี่คนดี"
+    "curse_file_name": "clips/curse.mp3"
 }
