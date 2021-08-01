@@ -66,7 +66,7 @@ class EventListener(commands.Cog):
     @commands.Cog.listener('on_message')
     async def onMessage(self, message):
         self.logger.info("On Message Received: {}".format(message))
-        if not message.author.bot:
+        if not message.author.bot and message.channel == self.message.channel:
             await self.refreshMessage()
 
     @commands.Cog.listener('on_message_delete')
