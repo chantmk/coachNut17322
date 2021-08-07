@@ -143,27 +143,22 @@ class EventListener(commands.Cog):
 
     async def handleTaggedMessage(self, payload):
         if payload.emoji.name == self.config[EMOJI_KEY][TAGS_EMOJI_KEY][1]:
-            current_count = self.taggedMessage[payload.message_id][0]
-            if current_count >= (len(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY])-1):
-                return
-            await self.tagSubscriber(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY][current_count+1])
-            await self.taggedMessage[payload.message_id][1].delete()
-            self.taggedMessage.pop(payload.message_id)
-        elif payload.emoji.name == self.config[EMOJI_KEY][TAGS_EMOJI_KEY][2]:
-            current_count = self.taggedMessage[payload.message_id][0]
-            if current_count <= 0:
-                return
-            await self.tagSubscriber(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY][current_count-1])
-            await self.taggedMessage[payload.message_id][1].delete()
-            self.taggedMessage.pop(payload.message_id)
-        elif payload.emoji.name == self.config[EMOJI_KEY][TAGS_EMOJI_KEY][3]:
-            await self.taggedMessage[payload.message_id][1].delete()
-            self.taggedMessage.pop(payload.message_id)
-
+            await self.removeTaggedMessage(payload.message_id)
+        elif payload.emoji.name in self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]:
+            idx = self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY].index(payload.emoji.name)
+            if idx < len(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]) and idx >= 0:
+                await self.tagSubscriber(self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY][idx])
+                await self.removeTaggedMessage(payload.message_id)
 
     async def tagSubscriber(self, count_emoji):
         message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(count_emoji), delete_after=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_TAG_KEY])
         for emoji in self.config[EMOJI_KEY][TAGS_EMOJI_KEY]:
             await message.add_reaction(emoji)
+        for emoji in self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]:
+            await message.add_reaction(emoji)
         self.taggedMessage[message.id] = (self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY].index(count_emoji), message)
         await self.refreshMessage()
+
+    async def removeTaggedMessage(self, message_id):
+        await self.taggedMessage[message_id][1].delete()
+        self.taggedMessage.pop(message_id)
