@@ -1,8 +1,11 @@
 from random import choice
 from discord.ext import commands
+from discord.ext.commands.converter import Greedy
+from discord.member import Member
+from discord.utils import find
 
 from scripts.Utils import *
-from scripts.Keys import SENTENCE_KEY, NO_NAME_KEY, CURSE_KEY, ADD_RESULT_KEY, REMOVE_RESULT_KEY, SUCCESS_KEY, CONTAINED_KEY, FAILED_KEY, NOT_IN_ROOM_KEY, CURSE_FILE_NAME, CONFIG_KEY, SENTENCE_DATA_KEY
+from scripts.Keys import SENTENCE_KEY, NO_NAME_KEY, CURSE_KEY, ADD_RESULT_KEY, REMOVE_RESULT_KEY, SUCCESS_KEY, CONTAINED_KEY, FAILED_KEY, NOT_IN_ROOM_KEY, CURSE_FILE_NAME, CONFIG_KEY, SENTENCE_DATA_KEY, ROLE_NAME
 from scripts.Constant import CURSE_MESSAGE_TIMEOUT, ADD_ALIASES, REMOVE_ALIASES
 
 LOGGER_TAG = "Command Handler"
@@ -23,7 +26,27 @@ class CommandHandler(commands.Cog):
             await ctx.message.delete()
         else:
             await self.handleCurse(ctx, args, True)
-        
+
+    @commands.command(aliases=["sub"])
+    async def subscribe(self, ctx, people: Greedy[Member]):
+        guild = ctx.guild
+        role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        if (len(people) == 0):
+            await ctx.author.add_roles(role)
+        else: 
+            for member in people:
+                await member.add_roles(role)
+    
+    @commands.command(aliases=["unsub"])
+    async def unsubscribe(self, ctx, people: Greedy[Member]):
+        guild = ctx.guild
+        role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        if (len(people) == 0):
+            await ctx.author.remove_roles(role)
+        else: 
+            for member in people:
+                await member.remove_roles(role)
+
     async def handleCurse(self, ctx, args, tts=False):
         if len(args) == 0:
             await ctx.send(self.config[SENTENCE_KEY][NO_NAME_KEY])

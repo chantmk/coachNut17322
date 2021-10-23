@@ -5,8 +5,10 @@ SENTENCE_KEY = "sentence"
 EMOJI_DATA_KEY = "emoji_data"
 SENTENCE_DATA_KEY = "sentence_data"
 
-CONFIG_NAME_KEY = "config_channel_name"
-DEFAULT_NAME_KEY = "default_channel_name"
+BOT_NAME_KEY = "bot_channel_name"
+BOT_TOPIC_KEY = "bot_channel_topic"
+
+ROLE_NAME = "subscriber_role_name"
 
 CURSE_FILE_NAME = "curse_file_name"
 

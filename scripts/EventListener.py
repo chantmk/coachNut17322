@@ -1,6 +1,11 @@
 import os
 import discord
+from discord import channel
+from discord.colour import Colour
 from discord.ext import commands
+from discord.permissions import PermissionOverwrite, Permissions
+from discord.utils import find, get
+from scripts.Constant import INTERRUPTED_MESSAGE_TIMEOUT
 
 from scripts.Utils import setupLogger
 from scripts.Keys import *
@@ -14,6 +19,7 @@ class EventListener(commands.Cog):
         self.bot = bot
         self.logger = setupLogger(handler, LOGGER_TAG)
         self.channel = ""
+        self.role = ""
         self.message = ""
         self.flag = MessageState.DELETED
         self.taggedMessage = dict()
@@ -34,19 +40,8 @@ class EventListener(commands.Cog):
     @commands.Cog.listener('on_guild_join')
     async def onGuildJoin(self, guild):
         self.logger.info("On Guild Join")
-        channel_name = self.config[CONFIG_KEY][CONFIG_NAME_KEY]
-        if(channel_name == ""):
-            channel_name = self.config[CONFIG_KEY][DEFAULT_NAME_KEY]
-        general_channel = ""
-        for channel in guild.channels:
-            if channel.name == self.config[CONFIG_KEY][DEFAULT_NAME_KEY]:
-                general_channel = channel
-            if channel.name == channel_name:
-                self.channel = channel
-                break
-        else:
-            self.channel = general_channel
-
+        self.role = await self.findOrCreateRole(guild)
+        self.channel = await self.findOrCreateChannel(guild, self.config[CONFIG_KEY][BOT_NAME_KEY], self.config[CONFIG_KEY][BOT_TOPIC_KEY])
         async for elem in self.channel.history(limit=50).filter(self.botMessageFilter):
             await elem.delete()
         await self.sendMessage()
@@ -54,11 +49,19 @@ class EventListener(commands.Cog):
     @commands.Cog.listener('on_ready')
     async def ready(self):
         self.logger.info("On Ready")
-        channel_name = self.config[CONFIG_KEY][CONFIG_NAME_KEY]
-        if(channel_name == ""):
-            channel_name = self.config[CONFIG_KEY][DEFAULT_NAME_KEY]
-        self.channel = discord.utils.get(self.bot.get_all_channels(), name=channel_name)
+        guild_list = self.bot.guilds
+        guild = None
+        if len(guild_list) == 0:
+            self.logger.error("There is no guild connected")
+            return
+        elif len(guild_list) > 1:
+            self.logger.error("There are more than 1 guild connected: {}, Connecting to {}".format(guild_list, guild_list[0].name))
+        
+        guild = guild_list[0]
+        self.channel = await self.findOrCreateChannel(guild, self.config[CONFIG_KEY][BOT_NAME_KEY], self.config[CONFIG_KEY][BOT_TOPIC_KEY])
+        self.role = await self.findOrCreateRole(guild)
         await self.clearMessage()
+        
         login_message = "Logged in as {0.user}".format(self.bot)
         self.logger.info(login_message)
         print(login_message)
@@ -68,6 +71,7 @@ class EventListener(commands.Cog):
         self.logger.info("On Message Received: {}".format(message))
         if not message.author.bot and message.channel == self.message.channel:
             await self.refreshMessage()
+            await message.delete(delay=INTERRUPTED_MESSAGE_TIMEOUT)
 
     @commands.Cog.listener('on_message_delete')
     async def onMessageDelete(self, message):
@@ -152,7 +156,7 @@ class EventListener(commands.Cog):
                 await self.removeTaggedMessage(payload.message_id)
 
     async def tagSubscriber(self, count_emoji):
-        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(count_emoji), delete_after=TAG_MESSAGE_TIMEOUT)
+        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(self.role.mention, count_emoji), delete_after=TAG_MESSAGE_TIMEOUT)
         for emoji in self.config[EMOJI_KEY][TAGS_EMOJI_KEY]:
             await message.add_reaction(emoji)
         for emoji in self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]:
@@ -163,3 +167,23 @@ class EventListener(commands.Cog):
     async def removeTaggedMessage(self, message_id):
         await self.taggedMessage[message_id][1].delete()
         self.taggedMessage.pop(message_id)
+
+    async def findOrCreateChannel(self, guild, channel_name, topic): 
+        found_channel = find(lambda guild_channel: guild_channel.name == channel_name, guild.channels)
+        if found_channel == None: 
+            overwrite = {
+                guild.default_role: discord.PermissionOverwrite(send_messages=False),
+                guild.me: PermissionOverwrite(send_messages=True)
+            }
+            self.logger.info("Channel not found, Creating")
+            return await guild.create_text_channel(channel_name, overwrites=overwrite, position=0, topic=topic)
+        else :
+            return found_channel
+
+    async def findOrCreateRole(self, guild):
+        found_role = find(lambda guild_role: guild_role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        if found_role == None:
+            self.logger.info("Role not found, Creating")
+            return await guild.create_role(name=self.config[CONFIG_KEY][ROLE_NAME], mentionable=True, colour=Colour.dark_teal())
+        else:
+            return found_role
