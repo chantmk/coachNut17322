@@ -1,12 +1,14 @@
 {
-    "default_channel_name": "general",
-    "config_channel_name": "",
+    "bot_channel_name": "เรียกเพื่อน",
+    "bot_channel_topic": "Channel for bot to send message",
+    "subscriber_role_name": "seshunkiddo",
     "emoji_data" : "jsons/emoji.json",
     "sentence_data" : "jsons/sentence.json",
     "curse_file_name": "clips/curse.mp3",
     "message_timeout": {
         "curse" : 20,
-        "command": 5,
-        "tag": 1800
+        "command": 30,
+        "tag": 1800,
+        "interrup": 300
     }
 }

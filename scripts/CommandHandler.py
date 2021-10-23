@@ -1,5 +1,8 @@
 from random import choice
 from discord.ext import commands
+from discord.ext.commands.converter import Greedy
+from discord.member import Member
+from discord.utils import find
 
 from scripts.Utils import *
 from scripts.Keys import *
@@ -23,7 +26,27 @@ class CommandHandler(commands.Cog):
             await ctx.message.delete(delay=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_COMMAND_KEY])
         else:
             await self.handleCurse(ctx, args, True)
-        
+
+    @commands.command(aliases=["sub"])
+    async def subscribe(self, ctx, people: Greedy[Member]):
+        guild = ctx.guild
+        role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        if (len(people) == 0):
+            await ctx.author.add_roles(role)
+        else: 
+            for member in people:
+                await member.add_roles(role)
+    
+    @commands.command(aliases=["unsub"])
+    async def unsubscribe(self, ctx, people: Greedy[Member]):
+        guild = ctx.guild
+        role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        if (len(people) == 0):
+            await ctx.author.remove_roles(role)
+        else: 
+            for member in people:
+                await member.remove_roles(role)
+
     async def handleCurse(self, ctx, args, tts=False):
         if len(args) == 0:
             await ctx.send(self.config[SENTENCE_KEY][NO_NAME_KEY], delete_after=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_CURSE_KEY])
