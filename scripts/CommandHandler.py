@@ -36,6 +36,7 @@ class CommandHandler(commands.Cog):
         else: 
             for member in people:
                 await member.add_roles(role)
+        await ctx.message.delete(delay=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_COMMAND_KEY])
     
     @commands.command(aliases=["unsub"])
     async def unsubscribe(self, ctx, people: Greedy[Member]):
@@ -46,6 +47,7 @@ class CommandHandler(commands.Cog):
         else: 
             for member in people:
                 await member.remove_roles(role)
+        await ctx.message.delete(delay=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_COMMAND_KEY])
 
     async def handleCurse(self, ctx, args, tts=False):
         if len(args) == 0:
