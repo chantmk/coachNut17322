@@ -7,7 +7,8 @@
     "curse_file_name": "clips/curse.mp3",
     "message_timeout": {
         "curse" : 20,
-        "command": 5,
-        "tag": 1800
+        "command": 30,
+        "tag": 1800,
+        "interrup": 300
     }
 }

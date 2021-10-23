@@ -9,7 +9,6 @@ from discord.utils import find, get
 from scripts.Utils import setupLogger
 from scripts.Keys import *
 from scripts.DataStructure import MessageState
-from scripts.Aliases import INTERRUPTED_MESSAGE_TIMEOUT, TAG_MESSAGE_TIMEOUT
 
 LOGGER_TAG = "Event Listener"
 
@@ -70,7 +69,7 @@ class EventListener(commands.Cog):
         self.logger.info("On Message Received: {}".format(message))
         if not message.author.bot and message.channel == self.message.channel:
             await self.refreshMessage()
-            await message.delete(delay=INTERRUPTED_MESSAGE_TIMEOUT)
+            await message.delete(delay=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_INTERRUPT_KEY])
 
     @commands.Cog.listener('on_message_delete')
     async def onMessageDelete(self, message):
@@ -155,7 +154,7 @@ class EventListener(commands.Cog):
                 await self.removeTaggedMessage(payload.message_id)
 
     async def tagSubscriber(self, count_emoji):
-        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(self.role.mention, count_emoji), delete_after=TAG_MESSAGE_TIMEOUT)
+        message = await self.channel.send(self.config[SENTENCE_KEY][TAG_MESSAGE_KEY].format(self.role.mention, count_emoji), delete_after=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_TAG_KEY])
         for emoji in self.config[EMOJI_KEY][TAGS_EMOJI_KEY]:
             await message.add_reaction(emoji)
         for emoji in self.config[EMOJI_KEY][NUMBERES_EMOJI_KEY]:
