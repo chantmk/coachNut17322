@@ -4,5 +4,10 @@
     "subscriber_role_name": "seshunkiddo",
     "emoji_data" : "jsons/emoji.json",
     "sentence_data" : "jsons/sentence.json",
-    "curse_file_name": "clips/curse.mp3"
+    "curse_file_name": "clips/curse.mp3",
+    "message_timeout": {
+        "curse" : 20,
+        "command": 5,
+        "tag": 1800
+    }
 }

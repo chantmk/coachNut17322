@@ -26,3 +26,4 @@ A discord bot that tag friends with count from reaction in sticky message develo
 - [ ] Data management
     - [ ] Save changed config
     - [ ] Save add/remove curse
+- [ ] Voice command

@@ -25,3 +25,8 @@ REMOVE_RESULT_KEY = "remove_result"
 SUCCESS_KEY = "success"
 CONTAINED_KEY = "contained"
 FAILED_KEY = "failed"
+
+MESSAGE_TIMEOUT_KEY = "message_timeout"
+TIMEOUT_CURSE_KEY = "curse"
+TIMEOUT_COMMAND_KEY = "command"
+TIMEOUT_TAG_KEY = "tag"

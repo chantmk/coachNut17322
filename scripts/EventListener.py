@@ -5,12 +5,11 @@ from discord.colour import Colour
 from discord.ext import commands
 from discord.permissions import PermissionOverwrite, Permissions
 from discord.utils import find, get
-from scripts.Constant import INTERRUPTED_MESSAGE_TIMEOUT
 
 from scripts.Utils import setupLogger
 from scripts.Keys import *
-from scripts.Constant import TAG_MESSAGE_TIMEOUT
 from scripts.DataStructure import MessageState
+from scripts.Aliases import INTERRUPTED_MESSAGE_TIMEOUT, TAG_MESSAGE_TIMEOUT
 
 LOGGER_TAG = "Event Listener"
 
