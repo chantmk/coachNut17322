@@ -17,6 +17,7 @@ NUMBERES_EMOJI_KEY = "numbers"
 TAGS_EMOJI_KEY = "tags"
 WELCOME_MESSAGE_KEY = "welcome_message"
 TAG_MESSAGE_KEY = "tag_message"
+JOIN_MESSAGE_KEY = "join_message"
 
 NO_NAME_KEY = "no_args_curse"
 NOT_IN_ROOM_KEY = "not_in_room_curse_with_sound"
