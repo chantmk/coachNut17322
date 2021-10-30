@@ -104,7 +104,7 @@ class EventListener(commands.Cog):
             return
         if before.status == Status.offline or after.status == Status.offline:
             check = find(lambda r: r.name == self.config[CONFIG_KEY][NOT_ROLE_NAME], before.roles)
-            if check == None:
+            if check != None:
                 if before.status == Status.offline:
                     await before.add_roles(self.role)
                 elif after.status == Status.offline:
