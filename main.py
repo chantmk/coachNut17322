@@ -2,6 +2,7 @@ import os
 import sys
 
 from discord.ext import commands
+from discord import Intents
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -34,7 +35,10 @@ config_data[EMOJI_KEY] = fromJsonFile(config_data[CONFIG_KEY][EMOJI_DATA_KEY], l
 config_data[SENTENCE_KEY] = fromJsonFile(config_data[CONFIG_KEY][SENTENCE_DATA_KEY], logger)
 
 # Setup bot
-bot = commands.Bot(command_prefix=['/coach', 'cn!', '!', '/'])
+intents = Intents.default()
+intents.members = True
+intents.presences = True
+bot = commands.Bot(command_prefix=['/coach', 'cn!', '!', '/'], intents=intents)
 bot.add_cog(EventListener(bot, handler, config_data))
 bot.add_cog(CommandHandler(bot, handler, config_data))
 

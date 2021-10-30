@@ -9,6 +9,7 @@ BOT_NAME_KEY = "bot_channel_name"
 BOT_TOPIC_KEY = "bot_channel_topic"
 
 ROLE_NAME = "subscriber_role_name"
+NOT_ROLE_NAME = "not_tag_role_name"
 
 CURSE_FILE_NAME = "curse_file_name"
 
@@ -30,4 +31,4 @@ MESSAGE_TIMEOUT_KEY = "message_timeout"
 TIMEOUT_CURSE_KEY = "curse"
 TIMEOUT_COMMAND_KEY = "command"
 TIMEOUT_TAG_KEY = "tag"
-TIMEOUT_INTERRUPT_KEY = "inturrupt"
+TIMEOUT_INTERRUPT_KEY = "interrupt"

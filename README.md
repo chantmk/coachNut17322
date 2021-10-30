@@ -16,10 +16,10 @@ A discord bot that tag friends with count from reaction in sticky message develo
 - [ ] Game emoji
     - [ ] Use custom emoji
     - [ ] Edit message when choose game
-- [ ] Role managing
-    - [ ] Tag a role
-    - [ ] Add/Remove role from friend when on-offline
-    - [ ] Command that restrict bot to add role for a user
+- [x] Role managing
+    - [x] Tag a role
+    - [x] Add/Remove role from friend when on-offline
+    - [x] Command that restrict bot to add role for a user
 - [x] Curse command
     - [x] Send curse message 
     - [x] Voice curse message

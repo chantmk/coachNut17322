@@ -2,6 +2,7 @@
     "bot_channel_name": "เรียกเพื่อน",
     "bot_channel_topic": "Channel for bot to send message",
     "subscriber_role_name": "seshunkiddo",
+    "not_tag_role_name": "seshuncheerleader",
     "emoji_data" : "jsons/emoji.json",
     "sentence_data" : "jsons/sentence.json",
     "curse_file_name": "clips/curse.mp3",
@@ -9,6 +10,6 @@
         "curse" : 20,
         "command": 30,
         "tag": 1800,
-        "interrup": 300
+        "interrupt": 300
     }
 }
