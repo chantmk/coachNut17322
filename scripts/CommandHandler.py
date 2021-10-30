@@ -30,22 +30,27 @@ class CommandHandler(commands.Cog):
     @commands.command(aliases=["sub"])
     async def subscribe(self, ctx, people: Greedy[Member]):
         guild = ctx.guild
-        role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        role = find(lambda role: role.name == self.config[CONFIG_KEY][NOT_ROLE_NAME], guild.roles)
+        sub_role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
         if (len(people) == 0):
             await ctx.author.add_roles(role)
+            await ctx.author.remove_roles(sub_role)
         else: 
             for member in people:
                 await member.add_roles(role)
+                await member.remove_roles(sub_role)
+        await ctx.message.delete(delay=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_COMMAND_KEY])
     
     @commands.command(aliases=["unsub"])
     async def unsubscribe(self, ctx, people: Greedy[Member]):
         guild = ctx.guild
-        role = find(lambda role: role.name == self.config[CONFIG_KEY][ROLE_NAME], guild.roles)
+        role = find(lambda role: role.name == self.config[CONFIG_KEY][NOT_ROLE_NAME], guild.roles)
         if (len(people) == 0):
             await ctx.author.remove_roles(role)
         else: 
             for member in people:
                 await member.remove_roles(role)
+        await ctx.message.delete(delay=self.config[CONFIG_KEY][MESSAGE_TIMEOUT_KEY][TIMEOUT_COMMAND_KEY])
 
     async def handleCurse(self, ctx, args, tts=False):
         if len(args) == 0:

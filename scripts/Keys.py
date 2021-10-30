@@ -9,6 +9,7 @@ BOT_NAME_KEY = "bot_channel_name"
 BOT_TOPIC_KEY = "bot_channel_topic"
 
 ROLE_NAME = "subscriber_role_name"
+NOT_ROLE_NAME = "not_tag_role_name"
 
 CURSE_FILE_NAME = "curse_file_name"
 
@@ -16,6 +17,7 @@ NUMBERES_EMOJI_KEY = "numbers"
 TAGS_EMOJI_KEY = "tags"
 WELCOME_MESSAGE_KEY = "welcome_message"
 TAG_MESSAGE_KEY = "tag_message"
+JOIN_MESSAGE_KEY = "join_message"
 
 NO_NAME_KEY = "no_args_curse"
 NOT_IN_ROOM_KEY = "not_in_room_curse_with_sound"
@@ -30,4 +32,4 @@ MESSAGE_TIMEOUT_KEY = "message_timeout"
 TIMEOUT_CURSE_KEY = "curse"
 TIMEOUT_COMMAND_KEY = "command"
 TIMEOUT_TAG_KEY = "tag"
-TIMEOUT_INTERRUPT_KEY = "inturrupt"
+TIMEOUT_INTERRUPT_KEY = "interrupt"
